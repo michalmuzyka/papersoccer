@@ -8,6 +8,7 @@
         public Vertex[,] Board { get; private set; }
         public (int X, int Y) BallPosition { get; private set; }
         public Vertex BallPositionVertex { get => Board[BallPosition.X, BallPosition.Y]; }
+        public bool IsGameOver { get => BallPositionVertex.IsGoal; }
 
         public Game()
         {
@@ -59,6 +60,28 @@
             }
         }
 
+        public void MakeMove((int X, int Y) move)
+        {
+            var sp = BallPosition; // startPosition
+            var startVertex = BallPositionVertex;
+            var vertexToGoTo = Board[move.X, move.Y];
+
+            // remove both edges (a -> b and b -> a)
+            Board[sp.X, sp.Y].Neighbors.Remove(vertexToGoTo);
+            Board[move.X, move.Y].Neighbors.Remove(startVertex);
+
+            BallPosition = move;
+        }
+        
+        /// <summary>
+        /// Zwraca dozwolone ruchy z obecnej pozycji
+        /// </summary>
+        /// <returns></returns>
+        public List<Vertex> GetPossibleMoves()
+        {
+            return Board[BallPosition.X, BallPosition.Y].Neighbors;
+        }
+
         /// <summary>
         /// Metoda przeznaczona do wyznaczania losowych ruchów komputera (do testowania UI)
         /// </summary>
@@ -73,7 +96,12 @@
 
             while(true)
             {
-                var nextVertex = currentVertex.Neighbors.OrderBy(v => rng.Next()).First();
+                var (previousX, previousY) = moves.LastOrDefault();
+
+                // trzeba uważać żeby się nie cofnąć
+                var nextVertex = currentVertex.Neighbors.Where(v => v.X != previousX && v.Y != previousY)
+                    .OrderBy(v => rng.Next()).First();
+
                 var visited = nextVertex.WasVisited;
                 var noMoves = nextVertex.NoMoves;
                 moves.Add((nextVertex.X, nextVertex.Y));
