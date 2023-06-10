@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -25,14 +26,15 @@ namespace UI
         DrawingManager drawingManager;
         Game game;
 
-        public GameBoard()
+        public GameBoard(Strategy player1, Strategy player2)
         {
             InitializeComponent();
-            game = new Game();
+            game = new Game(player1, player2);
             drawingManager = new DrawingManager(MainCanvas, game);
 
             this.Loaded += GameBoard_Loaded;
             MainCanvas.MouseUp += MainCanvas_MouseUp;
+            MakeMove();
         }
 
         private void MainCanvas_MouseUp(object sender, MouseButtonEventArgs e)
@@ -47,6 +49,19 @@ namespace UI
                     game.PlayerMove = !game.PlayerMove;
 
                 VerifyGameStatus();
+                MakeMove();
+            }
+        }
+
+        private async void MakeMove()
+        {
+            if (!game.PlayerMove || game.Player1 != Strategy.Player)
+            {
+                await Task.Delay(1000);
+                game.AImove();
+                game.PlayerMove = !game.PlayerMove;
+                VerifyGameStatus();
+                MakeMove();
             }
         }
 

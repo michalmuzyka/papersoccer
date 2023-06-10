@@ -1,4 +1,5 @@
-﻿using System;
+﻿using PaperSoccer;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -23,6 +24,16 @@ namespace UI
         public StartPage()
         {
             InitializeComponent();
+        }
+
+        private void play_Click(object sender, RoutedEventArgs e)
+        {
+            StartGame(Enum.GetValues<Strategy>()[p1.SelectedIndex], Enum.GetValues<Strategy>()[p2.SelectedIndex + 1]);
+        }
+
+        private void StartGame(Strategy player1, Strategy player2)
+        {
+            this.NavigationService.Navigate(new GameBoard(player1, player2));
         }
     }
 }

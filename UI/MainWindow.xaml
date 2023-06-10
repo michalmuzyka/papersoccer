@@ -9,5 +9,5 @@
         SizeToContent="WidthAndHeight"
         ResizeMode="NoResize">
     
-    <Frame Name="MainFrame" Source="GameBoard.xaml" NavigationUIVisibility="Hidden"/>
+    <Frame Name="MainFrame" Source="StartPage.xaml" NavigationUIVisibility="Hidden"/>
 </Window>

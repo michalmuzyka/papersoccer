@@ -11,8 +11,14 @@
         public bool IsGameOver { get => BallPositionVertex.IsGoal; }
         public bool PlayerGoal => BallPosition.X >= 3 && BallPosition.X <= 5 && BallPosition.Y == 0;
 
-        public Game()
+        public Strategy Player1 { get; set; }
+        public Strategy Player2 { get; set; }
+
+        public Game(Strategy p1, Strategy p2)
         {
+            Player1 = p1;
+            Player2 = p2;
+
             BallPosition = (MaxX / 2, MaxY / 2);
             Board = new Vertex[MaxX, MaxY];
 
@@ -59,6 +65,22 @@
 
                 BallPosition = move;
             }
+        }
+
+        public void AImove()
+        {
+            Strategy s = Player2;
+            if (PlayerMove) //player 1
+                s = Player1;
+
+            MakeMove(GetRandomMoves());
+            //switch (s)
+            //{
+            //    case Strategy.Heuristics: break;
+            //    case Strategy.MCTS: break;
+            //    case Strategy.MCTS_RAVE: break;
+            //    case Strategy.MCTS_PUCT: break;
+            //}
         }
 
         public void MakeMove((int X, int Y) move)

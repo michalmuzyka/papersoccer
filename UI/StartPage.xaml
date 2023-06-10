@@ -4,12 +4,60 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:UI"
+      xmlns:System="clr-namespace:System;assembly=mscorlib"
       mc:Ignorable="d" 
       Title="StartPage"        
-      Height="{Binding Source={StaticResource consts}, Path=BoardHeight}" 
-      Width="{Binding Source={StaticResource consts}, Path=BoardWidth}">
+      Height="400" 
+      Width="400"
+      Background="White">
+
+    <Page.Resources>
+        <Style TargetType="Button">
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Margin" Value="10"/>
+        </Style>
+
+        <ObjectDataProvider x:Key="player1Strategies" MethodName="GetPlayer1"
+                            ObjectType="{x:Type local:StrategyProvider}" />
+
+        <ObjectDataProvider x:Key="player2Strategies" MethodName="GetPlayer2"
+                            ObjectType="{x:Type local:StrategyProvider}" />
+    </Page.Resources>
 
     <Grid>
-        
+        <Grid.RowDefinitions>
+            <RowDefinition Height="100"/>
+            <RowDefinition />
+            <RowDefinition Height="80px"/>
+        </Grid.RowDefinitions>
+
+        <Label HorizontalAlignment="Center" FontSize="22" Margin="20" FontWeight="Bold" Content="Paper Soccer"/>
+
+        <GroupBox Header="AI settings" Grid.Row="1" Margin="15">
+            <StackPanel>
+                <Grid Margin="10">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition Width="3*"/>
+                    </Grid.ColumnDefinitions>
+                    <Label Grid.Column="0" Content="Player 1:"/>
+                    <ComboBox Grid.Column="1" IsSynchronizedWithCurrentItem="True" Name="p1" ItemsSource="{Binding Source={StaticResource player1Strategies}, Converter={local:StrategyConverter}}" />
+                </Grid>
+
+                <Grid Margin="10">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition Width="3*"/>
+                    </Grid.ColumnDefinitions>
+                    <Label Grid.Column="0" Content="Player 2:"/>
+                    <ComboBox Grid.Column="1" IsSynchronizedWithCurrentItem="True" Name="p2" ItemsSource="{Binding Source={StaticResource player2Strategies}, Converter={local:StrategyConverter}}" />
+                </Grid>
+            </StackPanel>
+        </GroupBox>
+
+        <Button Grid.Row="2" Name="play" Click="play_Click">
+            <Label Content="Play"/>
+        </Button>
     </Grid>
 </Page>
