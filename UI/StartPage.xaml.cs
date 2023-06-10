@@ -28,7 +28,7 @@ namespace UI
 
         private void play_Click(object sender, RoutedEventArgs e)
         {
-            StartGame(Enum.GetValues<Strategy>()[p1.SelectedIndex], Enum.GetValues<Strategy>()[p2.SelectedIndex + 1]);
+            StartGame(Enum.GetValues<Strategy>()[p1.SelectedIndex], Enum.GetValues<Strategy>()[p2.SelectedIndex]);
         }
 
         private void StartGame(Strategy player1, Strategy player2)

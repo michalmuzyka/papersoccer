@@ -55,7 +55,8 @@ namespace UI
 
         private async void MakeMove()
         {
-            if (!game.PlayerMove || game.Player1 != Strategy.Player)
+            if ((game.PlayerMove && game.Player1 != Strategy.Player) || 
+                (!game.PlayerMove && game.Player2 != Strategy.Player))
             {
                 await Task.Delay(1000);
                 game.AImove();

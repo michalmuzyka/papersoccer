@@ -18,11 +18,9 @@
             <Setter Property="Margin" Value="10"/>
         </Style>
 
-        <ObjectDataProvider x:Key="player1Strategies" MethodName="GetPlayer1"
+        <ObjectDataProvider x:Key="strategies" MethodName="GetStrategies"
                             ObjectType="{x:Type local:StrategyProvider}" />
 
-        <ObjectDataProvider x:Key="player2Strategies" MethodName="GetPlayer2"
-                            ObjectType="{x:Type local:StrategyProvider}" />
     </Page.Resources>
 
     <Grid>
@@ -42,7 +40,7 @@
                         <ColumnDefinition Width="3*"/>
                     </Grid.ColumnDefinitions>
                     <Label Grid.Column="0" Content="Player 1:"/>
-                    <ComboBox Grid.Column="1" IsSynchronizedWithCurrentItem="True" Name="p1" ItemsSource="{Binding Source={StaticResource player1Strategies}, Converter={local:StrategyConverter}}" />
+                    <ComboBox Grid.Column="1" IsSynchronizedWithCurrentItem="True" Name="p1" ItemsSource="{Binding Source={StaticResource strategies}, Converter={local:StrategyConverter}}" />
                 </Grid>
 
                 <Grid Margin="10">
@@ -51,7 +49,7 @@
                         <ColumnDefinition Width="3*"/>
                     </Grid.ColumnDefinitions>
                     <Label Grid.Column="0" Content="Player 2:"/>
-                    <ComboBox Grid.Column="1" IsSynchronizedWithCurrentItem="True" Name="p2" ItemsSource="{Binding Source={StaticResource player2Strategies}, Converter={local:StrategyConverter}}" />
+                    <ComboBox Grid.Column="1" IsSynchronizedWithCurrentItem="True" Name="p2" ItemsSource="{Binding Source={StaticResource strategies}, Converter={local:StrategyConverter}}" />
                 </Grid>
             </StackPanel>
         </GroupBox>

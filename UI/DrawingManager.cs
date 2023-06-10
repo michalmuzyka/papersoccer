@@ -59,7 +59,9 @@ public class DrawingManager
 
     public void Update()
     {
-        if (!IsGameOver && game.PlayerMove && game.Player1 == Strategy.Player)
+        if (!IsGameOver && 
+            ((game.PlayerMove && game.Player1 == Strategy.Player) || 
+             (!game.PlayerMove && game.Player2 == Strategy.Player)))
             mesh.UpdatePossibleMoves();
     }
 
@@ -70,7 +72,8 @@ public class DrawingManager
         DrawBorder();        
         DrawHistory();
     
-        if(!IsGameOver && game.PlayerMove && game.Player1 == Strategy.Player)
+        if(!IsGameOver && ((game.PlayerMove && game.Player1 == Strategy.Player) ||
+             (!game.PlayerMove && game.Player2 == Strategy.Player)))
             DrawPossibleMoves(mousePosition);
 
         canvas.Children.Add(GetBall());

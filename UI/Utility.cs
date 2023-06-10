@@ -21,14 +21,9 @@ public static class Utility
 
 public class StrategyProvider
 {
-    public Array GetPlayer1()
+    public Array GetStrategies()
     {
         return Enum.GetValues<Strategy>();
-    }
-
-    public Array GetPlayer2()
-    {
-        return Enum.GetValues<Strategy>().Where(s => s != Strategy.Player).ToArray();
     }
 }
 public static class EnumHelper
