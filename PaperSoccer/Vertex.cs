@@ -9,12 +9,12 @@ namespace PaperSoccer
     public class Vertex
     {
         /// <summary>
-        /// od 0 do 7 (0 to lewa banda; 3-4-5 to bramka; 7 to prawa banda)
+        /// od 0 do 8 (0 to lewa banda; 3-4-5 to bramka; 8 to prawa banda)
         /// </summary>
         public int X { get; set; }
 
         /// <summary>
-        /// od 0 do 11 (0 - górna bramka; 11 - dolna bramka; poza bramką dostępne są tylko od 1 do 10)
+        /// od 0 do 12 (0 - górna bramka; 12 - dolna bramka; poza bramką dostępne są tylko od 1 do 11)
         /// </summary>
         public int Y { get; set; }
 
@@ -40,7 +40,7 @@ namespace PaperSoccer
 
         public bool IsGoal
         {
-            get => (X == 3 || X == 4 || X == 5) && (Y == 0 || Y == 11); 
+            get => (X == 3 || X == 4 || X == 5) && (Y == 0 || Y == 12); 
         }
 
         public bool NoMoves
@@ -51,7 +51,7 @@ namespace PaperSoccer
 
         /// <summary>
         /// używane do stwierdzania czy się 'odbijamy' czyli czy po dostawieniu krawędzi
-        /// nasza tura się kończy czy też rysujemy kolejną
+        /// nasza tura się kończy czy też rysujemy kolejną PRZED WYKONANIEM RUCHU
         /// </summary>
         public bool WasVisited
         {
@@ -59,11 +59,20 @@ namespace PaperSoccer
         }
 
         /// <summary>
-        /// powinno byc sprawdzane tylko jeśli IsTerminal
+        /// używane do stwierdzania czy się 'odbijamy' czyli czy po dostawieniu krawędzi
+        /// nasza tura się kończy czy też rysujemy kolejną PO WYKONANIU RUCHU
+        /// </summary>
+        public bool WasVisited2
+        {
+            get => Neighbors.Count != 7;
+        }
+
+        /// <summary>
+        /// powinno byc sprawdzane tylko jeśli IsTerminal; to value dla gracza z góry; dla oponenta *= -1
         /// </summary>
         public int Value
         {
-            get => IsGoal && X == 11 ? 1 : IsGoal && X == 0 ? -1 : 0;
+            get => Y == 0 ? -1 : Y == 12 ? 1 : 0;
         }
     }
 }

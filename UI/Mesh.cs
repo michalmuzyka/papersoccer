@@ -62,8 +62,8 @@ public class Mesh
     {
         this.game = game;
         // pierwszy i ostatni leży na granicy siatki
-        X = game.MaxX + 2;
-        Y = game.MaxY + 2;  
+        X = game.MaxX + 1;
+        Y = game.MaxY + 1;  
 
         CreateBorder();
         UpdatePossibleMoves();

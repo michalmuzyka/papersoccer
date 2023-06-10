@@ -2,13 +2,13 @@
 {
     public class Game
     {
-        public int MaxX { get; } = 8;
-        public int MaxY { get; } = 12;
+        public int MaxX { get; } = 9;
+        public int MaxY { get; } = 13;
         public bool PlayerMove { get; set; }
         public Vertex[,] Board { get; private set; }
         public (int X, int Y) BallPosition { get; private set; }
         public Vertex BallPositionVertex { get => Board[BallPosition.X, BallPosition.Y]; }
-        public bool IsGameOver { get => BallPositionVertex.IsGoal; }
+        public bool IsGameOver { get => BallPositionVertex.IsGoal || BallPositionVertex.NoMoves; }
         public bool PlayerGoal => BallPosition.X >= 3 && BallPosition.X <= 5 && BallPosition.Y == 0;
 
         public Strategy Player1 { get; set; }
@@ -18,6 +18,7 @@
         {
             Player1 = p1;
             Player2 = p2;
+            PlayerMove = true;
 
             BallPosition = (MaxX / 2, MaxY / 2);
             Board = new Vertex[MaxX, MaxY];
@@ -72,23 +73,6 @@
                 BallPosition = move;
             }
         }
-
-        public void AImove()
-        {
-            Strategy s = Player2;
-            if (PlayerMove) //player 1
-                s = Player1;
-
-            MakeMove(GetRandomMoves());
-            //switch (s)
-            //{
-            //    case Strategy.Heuristics: break;
-            //    case Strategy.MCTS: break;
-            //    case Strategy.MCTS_RAVE: break;
-            //    case Strategy.MCTS_PUCT: break;
-            //}
-        }
-
         public void MakeMove((int X, int Y) move)
         {
             var sp = BallPosition; // startPosition
@@ -101,6 +85,45 @@
 
             BallPosition = move;
         }
+
+        /// <summary>
+        /// czasami łatwiej zwrócić nowy stan planszy niż listę ruchów
+        /// </summary>
+        /// <param name="newBoard"></param>
+        /// <param name="newBallPos"></param>
+        public void MakeMove(Vertex[,] newBoard, (int, int) newBallPos)
+        {
+            Board = newBoard;
+            BallPosition = newBallPos;
+        }
+
+        public void AImove()
+        {
+            Strategy s = Player2;
+            if (PlayerMove) //player 1
+                s = Player1;
+
+            
+            switch (s)
+            {
+                case Strategy.Heuristics:
+                    MakeMove(GetRandomMoves());
+                    break;
+                case Strategy.MCTS:
+                    var mcts = new MCTS(new Node(this, null), true);
+                    mcts.RunSimulation();
+                    var bestMove = mcts.GetBestMove();
+                    MakeMove(bestMove.Board, bestMove.BallPosition);
+                    break;
+                case Strategy.MCTS_RAVE:
+                    break;
+                case Strategy.MCTS_PUCT: 
+                    break;
+                default:
+                    break;
+            }
+        }
+
         
         /// <summary>
         /// Zwraca dozwolone ruchy z obecnej pozycji
@@ -158,9 +181,6 @@
         /// <summary>
         /// Sprawdza czy można odbić się od punktu siatki
         /// </summary>
-        /// <param name="x"></param>
-        /// <param name="y"></param>
-        /// <returns></returns>
         public bool CanBounceFrom(int x, int y)
         {
             if (PositionIsOnEdge(x, y))
@@ -251,14 +271,14 @@
                     if ((y == 1 || y == MaxY - 2) && x == 3 && dy == 0 && dx != 1) // lewe słupki - nie można w lewo
                         continue;
 
-                    if ((y == 1 || y == MaxY - 2) && x == 5 && dy == 0 && (dx != -1)) // prawe słupki - nie można w prawo
+                    if ((y == 1 || y == MaxY - 2) && x == 5 && dy == 0 && dx != -1) // prawe słupki - nie można w prawo
                         continue;
 
                     // teraz robimy, żeby ze słupka nie dało się do narożnika bramki
-                    if (y == 1 && (x == 3 || x == 5) && dy == -1 && dx == 0) // górne słupki - nie można w górę
+                    if (y == 1  && (x == 3 || x == 5) && dy == -1 && dx == 0) // górne słupki - nie można w górę
                         continue;
 
-                    if ((y == 1 || y == MaxY - 2) && x == 5 && dy == 0 && (dx != -1)) // prawe słupki - nie można w
+                    if (y == 11 && (x == 3 || x == 5) && dy ==  1 && dx == 0) // dolne słupki - nie można w dół
                         continue;
 
                     neighbors.Add(Board[x+dx, y+dy]);

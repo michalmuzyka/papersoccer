@@ -9,15 +9,17 @@ namespace PaperSoccer
     public class MCTS
     {
         public Node Root { get; set; }
+        public bool TopPlayer { get; set; } // czy ten grający na górze
 
-        public MCTS(Node root)
+        public MCTS(Node root, bool topPlayer)
         {
             Root = root;
+            TopPlayer = topPlayer;
         }
 
         public void RunSimulation()
         {
-            for (int i = 0; i < 1_000; i++) // Liczba symulacji
+            for (int i = 0; i < 1_00; i++) // Liczba symulacji
             {
                 var node = Selection();
                 int result = Simulation(node);
@@ -35,6 +37,10 @@ namespace PaperSoccer
                 {
                     return Expansion(node);
                 }
+                else if(node.Children.Any(c => !c.Visited)) // jest jeszcze nieodwiedzone dziecko
+                {
+                    return node.Children.First(c => !c.Visited);
+                }
                 else
                 {
                     node = node.SelectBestChild();
@@ -50,8 +56,8 @@ namespace PaperSoccer
             foreach (var move in availableMoves)
             {
                 var gameClone = node.State.Clone();
-                gameClone.MakeMove(move);
-                Node newNode = new Node(gameClone, node);
+                gameClone.MakeMove(move.Board, move.BallPosition);
+                var newNode = new Node(gameClone, node);
                 node.Children.Add(newNode);
             }
             return node.Children.First();
@@ -61,16 +67,18 @@ namespace PaperSoccer
         {
             // Losowe symulacje, aż do zakończenia gry
             var gameClone = node.State.Clone();
+            var topPlayer = TopPlayer;
 
             while (!node.IsTerminal)
             {
                 var availableMoves = node.GetAllPossibleMoves();
                 var randomMove = availableMoves[new Random().Next(availableMoves.Count)];
-                gameClone.MakeMove(randomMove);
+                gameClone.MakeMove(randomMove.Board, randomMove.BallPosition);
+                topPlayer = !topPlayer;
                 node = new Node(gameClone, node);
             }
 
-            return node.Value;
+            return node.Value * (topPlayer ? -1 : 1);
         }
 
         public void Backpropagation(Node? node, int result)
@@ -88,7 +96,8 @@ namespace PaperSoccer
         {
             // Zwraca najlepszy ruch na podstawie statystyk MCTS
             var bestChild = Root.Children.OrderByDescending(c => c.Visits).First();
-            return Root.SelectBestChild().State;
+            //return Root.SelectBestChild().State;
+            return bestChild.State;
         }
     }
 }

@@ -13,6 +13,7 @@ namespace PaperSoccer
         public Game State { get; set; }
         public List<Node> Children { get; set; }
         public Node? Parent { get; set; }
+        public bool Visited { get => Visits != 0; }
 
         public Node(Game game, Node? parent = null)
         {
@@ -37,21 +38,66 @@ namespace PaperSoccer
             }
         }
 
-        public List<List<(int X, int Y)>> GetAllPossibleMoves()
+        public List<Game> GetAllPossibleMoves()
         {
-            var res = new List<List<(int X, int Y)>>();
+            var movesFromHere = new List<Game>();
 
             // na razie tylko ruchy o długości 1
             var ballVertex = State.BallPositionVertex;
-            res = ballVertex.Neighbors.Select(v => new List<(int, int)>() { (v.X, v.Y) }).ToList();
+            //res = ballVertex.Neighbors.Select(v => new List<(int, int)>() { (v.X, v.Y) }).ToList();
 
-            return res;
+            if(ballVertex.Neighbors.Count == 0)
+            {
+                return movesFromHere;
+            }
+            // WSZYSTKIE RUCHY
+            // klonujemy Game tyle ile mamy sąsiadów
+
+            foreach (var neighbor in ballVertex.Neighbors)
+            {
+                var moveToConsider = neighbor.Tuple;
+                var newMoves = ConsiderMove(State, moveToConsider, 1);
+                movesFromHere.AddRange(newMoves);
+            }
+
+            return movesFromHere;
+        }
+
+        public List<Game> ConsiderMove(Game startState, (int X, int Y) move, int depth)
+        {
+            var clone = startState.Clone();
+            clone.MakeMove(move);
+
+            var bounce = clone.BallPositionVertex.WasVisited2;
+            var noMoves = clone.BallPositionVertex.NoMoves;
+
+            if (!bounce || noMoves)
+            {
+                return new List<Game>() { clone };
+            }
+
+            var movesFromHere = new List<Game>();
+
+            foreach(var neighbor in clone.BallPositionVertex.Neighbors)
+            {
+                var moveToConsider = neighbor.Tuple;
+
+                // nie sprawdzaj zbyt głęboko
+                if(depth >= 2 && neighbor.WasVisited)
+                {
+                    movesFromHere.Add(clone);
+                }
+
+                var newMoves = ConsiderMove(clone, moveToConsider, depth + 1);
+                movesFromHere.AddRange(newMoves);
+            }
+            return movesFromHere;
         }
 
         public Node SelectBestChild()
         {
             // Wybierz najlepsze dziecko na podstawie współczynnika UCT (Upper Confidence Bound for Trees)
-            return Children.OrderByDescending(c => c.Wins / (c.Visits == 0 ? -1 : c.Visits) + Math.Sqrt(2 * Math.Log(Visits) / (c.Visits == 0 ? -1 : c.Visits))).First();
+            return Children.OrderByDescending(c => c.Wins / c.Visits + Math.Sqrt(2 * Math.Log(Visits) / c.Visits)).First();
         }
 
         
