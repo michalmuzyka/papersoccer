@@ -18,10 +18,25 @@ namespace PaperSoccer
         /// </summary>
         public int Y { get; set; }
 
+        public (int X, int Y) Tuple { get => (X, Y); }
+
         /// <summary>
         /// lista sąsiadów (krawędzie) - jeśli ruch został wykonany to należy usunąć sąsiada
         /// </summary>
         public List<Vertex> Neighbors { get; set; }
+
+        public Vertex(int x, int y)
+        {
+            X = x; 
+            Y = y;
+            Neighbors = new();
+        }
+        public Vertex((int X, int Y) tuple)
+        {
+            X = tuple.X;
+            Y = tuple.Y;
+            Neighbors = new();
+        }
 
         public bool IsGoal
         {
@@ -41,6 +56,14 @@ namespace PaperSoccer
         public bool WasVisited
         {
             get => Neighbors.Count != 8;
+        }
+
+        /// <summary>
+        /// powinno byc sprawdzane tylko jeśli IsTerminal
+        /// </summary>
+        public int Value
+        {
+            get => IsGoal && X == 11 ? 1 : IsGoal && X == 0 ? -1 : 0;
         }
     }
 }

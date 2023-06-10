@@ -30,7 +30,7 @@
                     if (NotLegitPlace(i, j))
                         continue;
 
-                    Board[i, j] = new Vertex { X = i, Y = j };
+                    Board[i, j] = new Vertex(i, j);
                 }
             }
 
@@ -45,6 +45,12 @@
                     Board[i, j].Neighbors = GetNeighbors(i, j);
                 }
             }
+        }
+
+        public Game(Vertex[,] board, (int, int) ballPos)
+        {
+            Board = board;
+            BallPosition = ballPos;
         }
 
         /// <summary>
@@ -136,10 +142,6 @@
         /// <summary>
         /// Metoda służąca do stwierdzenia, czy na UI należy narysować kreskę pomiędzy dwoma współrzędnymi
         /// </summary>
-        /// <param name="x1"></param>
-        /// <param name="y1"></param>
-        /// <param name="x2"></param>
-        /// <param name="y2"></param>
         /// <returns></returns>
         public bool ShouldDraw(int x1, int y1, int x2, int y2)
         {
@@ -183,6 +185,38 @@
                    NotLegitPlace(x + 1, y + 1) ||
                    NotLegitPlace(x - 1, y + 1) ||
                    NotLegitPlace(x + 1, y - 1);
+        }
+
+        public Game Clone()
+        {
+            var newBoard = new Vertex[MaxX, MaxY];
+            var dictionary = new Dictionary<Vertex, Vertex>();
+
+            for (int i = 0; i < Board.GetLength(0); i++)
+            {
+                for (int j = 0; j < Board.GetLength(1); j++)
+                {
+                    if (NotLegitPlace(i, j))
+                        continue;
+
+                    var v = new Vertex(i, j);
+                    dictionary[Board[i, j]] = v;
+                    newBoard[i, j] = v;
+                }
+            }
+
+            for (int i = 0; i < Board.GetLength(0); i++)
+            {
+                for (int j = 0; j < Board.GetLength(1); j++)
+                {
+                    if (NotLegitPlace(i, j))
+                        continue;
+
+                    newBoard[i, j].Neighbors = Board[i, j].Neighbors.Select(v => dictionary[v]).ToList();
+                }
+            }
+
+            return new Game(newBoard, BallPosition);
         }
 
         // jest kilka miejsc w których nie powinno być Vertexa (rogi planszy) no i poza planszą ofc
