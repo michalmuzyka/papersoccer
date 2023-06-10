@@ -23,7 +23,7 @@
                     if (NotLegitPlace(i, j))
                         continue;
 
-                    Board[i, j] = new Vertex();
+                    Board[i, j] = new Vertex { X = i, Y = j };
                 }
             }
 
@@ -139,7 +139,7 @@
                 x < 0 || x >= MaxX || y < 0 || y >= MaxY;
         }
 
-        private List<Vertex> GetNeighbors(int x, int y)
+        public List<Vertex> GetNeighbors(int x, int y)
         {
             List<Vertex> neighbors = new List<Vertex>();
 
