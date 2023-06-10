@@ -37,7 +37,27 @@ namespace UI
 
         private void MainCanvas_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            drawingManager.MakeMove();
+            if (drawingManager.SelectedPossibleMove != null) 
+            { 
+                var move = Point.ToVertex(drawingManager.SelectedPossibleMove);
+
+                bool canBounceFromNewPos = game.CanBounceFrom(move.x, move.y);
+                game.MakeMove(move);
+                if (!canBounceFromNewPos)
+                    game.PlayerMove = !game.PlayerMove;
+
+                VerifyGameStatus();
+            }
+        }
+
+        private void VerifyGameStatus()
+        {
+            if (game.IsGameOver)
+                drawingManager.GameFinished(game.PlayerGoal);
+            else if (game.GetPossibleMoves().Count == 0)
+                drawingManager.GameFinished(game.PlayerMove);
+            else
+                drawingManager.Update();
         }
 
         private void GameBoard_Loaded(object sender, RoutedEventArgs e)

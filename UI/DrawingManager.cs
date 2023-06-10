@@ -21,7 +21,13 @@ public class DrawingManager
     double yOffset;
 
     List<Line> Border;
-    Point? selectedPossibleMove;
+    Label Player1;
+    Label Player2;
+    Label? Winner;
+
+    public Point? SelectedPossibleMove;
+    public bool IsGameOver { get; set; }
+
 
     public DrawingManager(Canvas boardCanvas, Game game)
     {
@@ -29,24 +35,61 @@ public class DrawingManager
         this.game = game;
         mesh = new Mesh(game);
 
-        xOffset = Consts.BoardWidth / (double)(mesh.X);
-        yOffset = Consts.BoardHeight / (double)(mesh.Y);
+        xOffset = Consts.TileSize;
+        yOffset = Consts.TileSize;
+
+        boardCanvas.Height = Consts.TileSize * mesh.Y;
+        boardCanvas.Width = Consts.TileSize * mesh.X;
 
         Border = mesh.BorderEdges.Select(GetBorderLine).ToList();
         mesh.UpdatePossibleMoves();
+
+        Player1 = GetLabel(new Point(1, mesh.Y - 2), Consts.Player1, Consts.BorderColor);
+        Player2 = GetLabel(new Point(1, 1), Consts.Player2, Consts.BorderColor);
+    }
+
+    public void GameFinished(bool playerWon)
+    {
+        IsGameOver = true;
+        if (playerWon)
+            Winner = GetLabel(new Point(mesh.X / 2 - 1, 0), $"Winner: {Consts.Player1}", Consts.BorderColor);
+        else
+            Winner = GetLabel(new Point(mesh.X / 2 - 1, mesh.Y - 1), $"Winner: {Consts.Player2}", Consts.BorderColor);
+    }
+
+    public void Update()
+    {
+        if(!IsGameOver) 
+            mesh.UpdatePossibleMoves();
     }
 
     public void DrawBoard(Point mousePosition)
     {
         canvas.Children.Clear();
 
-        foreach(var border in Border)
-            canvas.Children.Add(border);
-
-        DrawPossibleMoves(mousePosition);
+        DrawBorder();        
         DrawHistory();
+    
+        if(!IsGameOver)
+            DrawPossibleMoves(mousePosition);
 
         canvas.Children.Add(GetBall());
+    }
+    
+    private void DrawBorder()
+    {
+        foreach (var border in Border)
+            canvas.Children.Add(border);
+
+        if(Winner != null)
+            canvas.Children.Add(Winner);
+        else
+        {
+            if (game.PlayerMove)
+                canvas.Children.Add(Player1);
+            else
+                canvas.Children.Add(Player2);
+        }
     }
 
     private void DrawPossibleMoves(Point mousePosition)
@@ -57,13 +100,13 @@ public class DrawingManager
             var possibleMovePoint = possibleMove.Map(xOffset, yOffset);
             if (Utility.PointNearbyOtherPoint(possibleMovePoint, Consts.SelectPossibleMoveSize, mousePosition))
             {
-                selectedPossibleMove = possibleMove;
+                SelectedPossibleMove = possibleMove;
                 foundNextPoint = true;
                 canvas.Children.Add(GetSelectPossibleMove(possibleMove));
             }
 
             if (!foundNextPoint)
-                selectedPossibleMove = null;
+                SelectedPossibleMove = null;
 
             canvas.Children.Add(GetPossibleMove(possibleMove));
         }
@@ -86,17 +129,6 @@ public class DrawingManager
                         canvas.Children.Add(GetHistoryLine(new Connection(Point.FromVertex((v.x, v.y)), Point.FromVertex((n.X, n.Y)))));
                }
             }
-    }
-
-    public void MakeMove()
-    {
-        if (selectedPossibleMove != null)
-        {
-            var move = Point.ToVertex(selectedPossibleMove);
-            game.MakeMove(move);
-            mesh.UpdatePossibleMoves();
-            selectedPossibleMove = null;
-        }
     }
 
     private Rectangle GetBall() => GetRectangle(mesh.Ball, Consts.BallColor, Consts.BallSize);
@@ -144,7 +176,25 @@ public class DrawingManager
         Canvas.SetTop(rec, point.y - size / 2);
 
         return rec;
+    }
 
+    private Label GetLabel(Point point, string text, Brush color)
+    {
+        var label = new Label();
+        label.Content = text;
+        label.FontSize = 12;
+        label.Foreground = color;
+
+        var mapped = point.Map(xOffset, yOffset);
+
+        label.Measure(new System.Windows.Size(Consts.TileSize, Consts.TileSize));
+        var x = mapped.x + Consts.TileSize / 2 - label.DesiredSize.Width / 2;
+        var y = mapped.y + Consts.TileSize / 2 - label.DesiredSize.Height / 2;
+
+        Canvas.SetLeft(label, x);
+        Canvas.SetTop(label, y);
+
+        return label;
     }
 
 }

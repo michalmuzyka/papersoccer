@@ -4,16 +4,17 @@
     {
         public int MaxX { get; } = 8;
         public int MaxY { get; } = 12;
-        public bool PlayerMove { get; private set; }
+        public bool PlayerMove { get; set; }
         public Vertex[,] Board { get; private set; }
         public (int X, int Y) BallPosition { get; private set; }
         public Vertex BallPositionVertex { get => Board[BallPosition.X, BallPosition.Y]; }
         public bool IsGameOver { get => BallPositionVertex.IsGoal; }
+        public bool PlayerGoal => BallPosition.X >= 3 && BallPosition.X <= 5 && BallPosition.Y == 0;
 
         public Game()
         {
             BallPosition = (MaxX / 2, MaxY / 2);
-            Board = new Vertex[MaxX,MaxY];
+            Board = new Vertex[MaxX, MaxY];
 
             // tworzenie Vertexów
             for(int i = 0; i < Board.GetLength(0); i ++)
@@ -128,6 +129,38 @@
 
             return allPossibleNeighbors.Any(v => (v.X == x2 && v.Y == y2)) && // czy teoretycznie powinna być krawędź
                 !currentNeighbors.Any(v => (v.X == x2 && v.Y == y2)); // i czy została zużyta
+        }
+
+        /// <summary>
+        /// Sprawdza czy można odbić się od punktu siatki
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <returns></returns>
+        public bool CanBounceFrom(int x, int y)
+        {
+            if (PositionIsOnEdge(x, y))
+                return true;
+
+            var v1 = Board[x, y];
+
+            var allPossibleNeighbors = GetNeighbors(x, y);
+            var currentNeighbors = v1.Neighbors;
+
+            return allPossibleNeighbors.Count() != currentNeighbors.Count();
+        }
+
+        //jak po ruchu wylądujemy poza planszą to jesteśmy na krawędzi
+        private bool PositionIsOnEdge(int x, int y)
+        {
+            return NotLegitPlace(x - 1, y) ||
+                   NotLegitPlace(x, y - 1) ||
+                   NotLegitPlace(x - 1, y - 1) ||
+                   NotLegitPlace(x + 1, y) ||
+                   NotLegitPlace(x, y + 1) ||
+                   NotLegitPlace(x + 1, y + 1) ||
+                   NotLegitPlace(x - 1, y + 1) ||
+                   NotLegitPlace(x + 1, y - 1);
         }
 
         // jest kilka miejsc w których nie powinno być Vertexa (rogi planszy) no i poza planszą ofc
