@@ -59,7 +59,11 @@ namespace UI
 
                 // poprawianie drzewa mcts
 
-                await Task.Delay(100);
+
+                // czekanie sekundy jesli gra komputer vs komputer
+                if(game.Player1 != Strategy.Player && game.Player2 != Strategy.Player) {
+                    await Task.Delay(1000);
+                }
             }
 
             await VerifyGameStatus();
@@ -86,21 +90,6 @@ namespace UI
             }
         }
 
-        //private void MainCanvas_MouseUp(object sender, MouseButtonEventArgs e)
-        //{
-        //    if (drawingManager.SelectedPossibleMove != null) 
-        //    { 
-        //        var move = Point.ToVertex(drawingManager.SelectedPossibleMove);
-
-        //        bool canBounceFromNewPos = game.CanBounceFrom(move.x, move.y);
-        //        game.MakeMove(move);
-        //        if (!canBounceFromNewPos)
-        //            game.PlayerMove = !game.PlayerMove;
-
-        //        VerifyGameStatus();
-        //        MakeMove();
-        //    }
-        //}
 
         private void MainCanvas_MouseUp(object sender, MouseButtonEventArgs e)
         {
@@ -156,7 +145,7 @@ namespace UI
                     player1MCTS.RunSimulation(SIMULATION_MCTS);
                     break;
                 case Strategy.Heuristics:
-                    await Task.Delay(1000);
+                    //await Task.Delay(1000);
                     move = game.GetMoveHerestic();
                     break;
             }
@@ -200,7 +189,7 @@ namespace UI
                     player2MCTS.RunSimulation(SIMULATION_MCTS);
                     break;
                 case Strategy.Heuristics:
-                    await Task.Delay(1000);
+                    //await Task.Delay(1000);
                     move = game.GetMoveHerestic();
                     break;
             }
