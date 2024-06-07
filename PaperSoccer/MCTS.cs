@@ -17,9 +17,9 @@ namespace PaperSoccer
             TopPlayer = topPlayer;
         }
 
-        public void RunSimulation()
+        public void RunSimulation(int simulationNr)
         {
-            for (int i = 0; i < 1_00; i++) // Liczba symulacji
+            for (int i = 0; i < simulationNr; i++) // Liczba symulacji
             {
                 var node = Selection();
                 int result = Simulation(node);
@@ -48,6 +48,7 @@ namespace PaperSoccer
             }
             return node;
         }
+
 
         public Node Expansion(Node node)
         {

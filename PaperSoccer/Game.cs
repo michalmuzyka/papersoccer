@@ -125,7 +125,7 @@ namespace PaperSoccer
                     break;
                 case Strategy.MCTS:
                     var mcts = new MCTS(new Node(this, null), true);
-                    mcts.RunSimulation();
+                    //mcts.RunSimulation();
                     var bestMove = mcts.GetBestMove();
                     MakeMove(bestMove.Board, bestMove.BallPosition);
                     break;
