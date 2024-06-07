@@ -28,6 +28,7 @@ namespace UI
         MCTS player1MCTS = null;
         MCTS player2MCTS = null;
 
+        int update = 0;
 
         private TaskCompletionSource<Vertex> mouseClickTaskCompletionSource;
 
@@ -240,9 +241,9 @@ namespace UI
             if (game.IsGameOver)
                 drawingManager.GameFinished(game.PlayerGoal);
             else if (game.GetPossibleMoves().Count == 0)
-                drawingManager.GameFinished(game.CurrentPlayer != CurentPlayer.Player1);
-            //else
-            //    drawingManager.Update();
+                drawingManager.GameFinished(game.PlayerMove);
+            else
+                Interlocked.Exchange(ref update, 1);
         }
 
         private void GameBoard_Loaded(object sender, RoutedEventArgs e)
@@ -257,7 +258,10 @@ namespace UI
         {
             Mouse.Capture(this);
             var pointToWindow = Mouse.GetPosition(MainCanvas);
-            drawingManager.Update();
+
+            if (Interlocked.Exchange(ref update, 0) == 1)
+                drawingManager.Update();
+
             drawingManager.DrawBoard(new Point((int)pointToWindow.X, (int)pointToWindow.Y));
             Mouse.Capture(null);
         }
