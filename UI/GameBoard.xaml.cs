@@ -58,7 +58,11 @@ namespace UI
                 await VerifyGameStatus();
 
                 // poprawianie drzewa mcts
+
+                await Task.Delay(100);
             }
+
+            await VerifyGameStatus();
         }
 
         private void CreateMCTSTree(Strategy player1, Strategy player2) 
@@ -138,10 +142,10 @@ namespace UI
         }
 
 
-        private async void MovePlayer1() 
+        private async void MovePlayer1()
         {
             Vertex move = null;
-            switch (game.Player1) 
+            switch (game.Player1)
             {
                 case Strategy.Player:
                     move = await WaitForMouseClick();
@@ -157,24 +161,27 @@ namespace UI
                     break;
             }
 
-            // should switch players
-            if (!game.CanBounceFrom(move.X, move.Y)) 
+            if (move != null)
             {
-                if (game.CurrentPlayer == CurentPlayer.Player1)
+                // should switch players
+                if (!game.CanBounceFrom(move.X, move.Y))
                 {
-                    game.CurrentPlayer = CurentPlayer.Player2;
-                }
-                else 
-                {
-                    game.CurrentPlayer = CurentPlayer.Player1;
+                    if (game.CurrentPlayer == CurentPlayer.Player1)
+                    {
+                        game.CurrentPlayer = CurentPlayer.Player2;
+                    }
+                    else
+                    {
+                        game.CurrentPlayer = CurentPlayer.Player1;
+                    }
+
+                    game.PlayerMove = !game.PlayerMove;
                 }
 
-                game.PlayerMove = !game.PlayerMove;
+
+                // make move
+                game.MakeMoveV2(move);
             }
-
-
-            // make move
-            game.MakeMoveV2(move);
 
         }
 
@@ -198,21 +205,24 @@ namespace UI
                     break;
             }
 
-            // should switch players
-            if (!game.CanBounceFrom(move.X, move.Y))
+            if (move != null)
             {
-                if (game.CurrentPlayer == CurentPlayer.Player1)
+                // should switch players
+                if (!game.CanBounceFrom(move.X, move.Y))
                 {
-                    game.CurrentPlayer = CurentPlayer.Player2;
+                    if (game.CurrentPlayer == CurentPlayer.Player1)
+                    {
+                        game.CurrentPlayer = CurentPlayer.Player2;
+                    }
+                    else
+                    {
+                        game.CurrentPlayer = CurentPlayer.Player1;
+                    }
+                    game.PlayerMove = !game.PlayerMove;
                 }
-                else
-                {
-                    game.CurrentPlayer = CurentPlayer.Player1;
-                }
-                game.PlayerMove = !game.PlayerMove;
-            }
 
-            game.MakeMoveV2(move);
+                game.MakeMoveV2(move);
+            }
         }
 
 
@@ -232,17 +242,17 @@ namespace UI
         private async Task VerifyGameStatus()
         {
             if (game.IsGameOver)
-                drawingManager.GameFinished(game.PlayerGoal);
+                drawingManager.GameFinished(game.CurrentPlayer == CurentPlayer.Player1);
             else if (game.GetPossibleMoves().Count == 0)
-                drawingManager.GameFinished(game.PlayerMove);
-            else
-                drawingManager.Update();
+                drawingManager.GameFinished(game.CurrentPlayer != CurentPlayer.Player1);
+            //else
+            //    drawingManager.Update();
         }
 
         private void GameBoard_Loaded(object sender, RoutedEventArgs e)
         {
             var timer = new DispatcherTimer();
-            timer.Interval = TimeSpan.FromMilliseconds(1);
+            timer.Interval = TimeSpan.FromMilliseconds(10);
             timer.Tick += Timer_Tick;
             timer.Start();
         }
@@ -251,6 +261,7 @@ namespace UI
         {
             Mouse.Capture(this);
             var pointToWindow = Mouse.GetPosition(MainCanvas);
+            drawingManager.Update();
             drawingManager.DrawBoard(new Point((int)pointToWindow.X, (int)pointToWindow.Y));
             Mouse.Capture(null);
         }
