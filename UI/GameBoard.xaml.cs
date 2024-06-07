@@ -231,7 +231,7 @@ namespace UI
         private async Task VerifyGameStatus()
         {
             if (game.IsGameOver)
-                drawingManager.GameFinished(game.CurrentPlayer == CurentPlayer.Player1);
+                drawingManager.GameFinished(game.PlayerGoal);
             else if (game.GetPossibleMoves().Count == 0)
                 drawingManager.GameFinished(game.CurrentPlayer != CurentPlayer.Player1);
             //else
