@@ -30,6 +30,9 @@ namespace UI
         private const int SIMULATION_MCTS = 100;
 
         int update = 0;
+        int waitForClick = 0;
+        int mouseX = 0;
+        int mouseY = 0;
 
         private TaskCompletionSource<Vertex> mouseClickTaskCompletionSource;
 
@@ -95,26 +98,30 @@ namespace UI
 
         private void MainCanvas_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            if (drawingManager.SelectedPossibleMove != null && mouseClickTaskCompletionSource !=null)
+            if (Interlocked.CompareExchange(ref waitForClick, 1, 1) == 1 && drawingManager.SelectedPossibleMove != null)
             {
                 var move = Point.ToVertex(drawingManager.SelectedPossibleMove);
 
-                mouseClickTaskCompletionSource.SetResult(game.Board[move.x, move.y]);
-
-                return; 
-
+                Interlocked.Exchange(ref mouseX, move.x);
+                Interlocked.Exchange(ref mouseY, move.y);
+                Interlocked.Exchange(ref waitForClick, 2);
             }
         }
 
 
-        private async Task<Vertex> WaitForMouseClick() 
+        private Vertex WaitForMouseClick() 
         {
-            mouseClickTaskCompletionSource = new TaskCompletionSource<Vertex>();
-            Vertex selectedVertex = await mouseClickTaskCompletionSource.Task;
-            mouseClickTaskCompletionSource = null;
+            Interlocked.CompareExchange(ref waitForClick, 1, 0);
 
-            return selectedVertex;
+            if (Interlocked.CompareExchange(ref waitForClick, 0, 2) == 2)
+            {
+                var x = Interlocked.Exchange(ref mouseX, 0);
+                var y = Interlocked.Exchange(ref mouseY, 0);
 
+                return game.Board[x, y];
+            }
+
+            return null;
         }
 
         private async Task MakeMoveV2() 
@@ -139,7 +146,7 @@ namespace UI
             switch (game.Player1)
             {
                 case Strategy.Player:
-                    move = await WaitForMouseClick();
+                    move = WaitForMouseClick();
                     break;
                 case Strategy.MCTS_PUCT:
                 case Strategy.MCTS_RAVE:
@@ -183,7 +190,7 @@ namespace UI
             switch (game.Player2)
             {
                 case Strategy.Player:
-                    move = await WaitForMouseClick();
+                    move = WaitForMouseClick();
                     break;
                 case Strategy.MCTS_PUCT:
                 case Strategy.MCTS_RAVE:
@@ -250,10 +257,10 @@ namespace UI
 
         private void Timer_Tick(object? sender, EventArgs e)
         {
-            Mouse.Capture(this);
+            Mouse.Capture(this, CaptureMode.SubTree);
             var pointToWindow = Mouse.GetPosition(MainCanvas);
 
-            if (Interlocked.Exchange(ref update, 0) == 1)
+            if (Interlocked.CompareExchange(ref update, 0, 1) == 1)
                 drawingManager.Update();
 
             drawingManager.DrawBoard(new Point((int)pointToWindow.X, (int)pointToWindow.Y));
