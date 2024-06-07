@@ -295,6 +295,23 @@ namespace PaperSoccer
                     if (y == 11 && (x == 3 || x == 5) && dy ==  1 && dx == 0) // dolne słupki - nie można w dół
                         continue;
 
+                    //strzał z boku w lewy róg górnej bramki
+                    if (y == 1 && x == 2 && dy == -1 && dx == 1) 
+                        continue;
+
+                    //strzał z boku w prawy róg górnej bramki
+                    if (y == 1 && x == 6 && dy == -1 && dx == -1)
+                        continue;
+
+
+                    //strzał z boku w lewy róg dolnej bramki
+                    if (y == 11 && x == 2 && dy == 1 && dx == 1)
+                        continue;
+
+                    //strzał z boku w prawy róg dolnej bramki
+                    if (y == 11 && x == 6 && dy == 1 && dx == -1)
+                        continue;
+
                     neighbors.Add(Board[x+dx, y+dy]);
                 }
             }
