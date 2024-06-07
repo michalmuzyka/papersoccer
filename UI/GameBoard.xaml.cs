@@ -27,7 +27,7 @@ namespace UI
         Game game;
         MCTS player1MCTS = null;
         MCTS player2MCTS = null;
-
+        private const int SIMULATION_MCTS = 100;
 
         private TaskCompletionSource<Vertex> mouseClickTaskCompletionSource;
 
@@ -149,8 +149,10 @@ namespace UI
                 case Strategy.MCTS_PUCT:
                 case Strategy.MCTS_RAVE:
                 case Strategy.MCTS:
+                    player1MCTS.RunSimulation(SIMULATION_MCTS);
                     break;
                 case Strategy.Heuristics:
+                    await Task.Delay(1000);
                     move = game.GetMoveHerestic();
                     break;
             }
@@ -188,8 +190,10 @@ namespace UI
                 case Strategy.MCTS_PUCT:
                 case Strategy.MCTS_RAVE:
                 case Strategy.MCTS:
+                    player2MCTS.RunSimulation(SIMULATION_MCTS);
                     break;
                 case Strategy.Heuristics:
+                    await Task.Delay(1000);
                     move = game.GetMoveHerestic();
                     break;
             }
