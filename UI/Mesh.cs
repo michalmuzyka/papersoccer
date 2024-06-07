@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -58,6 +59,8 @@ public class Mesh
     public List<Connection> BorderEdges { get; set; } = new List<Connection>();
     public List<Point> PossibleMoves { get; set; } = new List<Point>();
 
+    public static readonly object locker = new object();
+
     public Mesh(Game game)
     {
         this.game = game;
@@ -71,9 +74,13 @@ public class Mesh
 
     public void UpdatePossibleMoves()
     {
-        PossibleMoves = new List<Point>();
 
-        PossibleMoves.AddRange(game.GetPossibleMoves().Select(Point.FromVertex));
+        lock (locker)
+        {
+            PossibleMoves = new List<Point>();
+
+            PossibleMoves.AddRange(game.GetPossibleMoves().Select(Point.FromVertex));
+        }
     }
 
     private void CreateBorder()

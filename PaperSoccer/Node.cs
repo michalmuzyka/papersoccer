@@ -15,6 +15,8 @@ namespace PaperSoccer
         public Node? Parent { get; set; }
         public bool Visited { get => Visits != 0; }
 
+        public double puct_weight { get; set; }
+
         public Node(Game game, Node? parent = null)
         {
             State = game;
@@ -97,9 +99,28 @@ namespace PaperSoccer
         public Node SelectBestChild()
         {
             // Wybierz najlepsze dziecko na podstawie współczynnika UCT (Upper Confidence Bound for Trees)
+
+            //return UCT.CalculateUCT
+
             return Children.OrderByDescending(c => c.Wins / c.Visits + Math.Sqrt(2 * Math.Log(Visits) / c.Visits)).First();
         }
 
-        
+
+        public void CalculateChildrenNodesWeights() 
+        {
+            int visitSum = 0;
+
+            foreach (var child in Children)
+            {
+                visitSum += child.Visits;
+            }
+
+
+            foreach (var child in Children) 
+            {
+                child.puct_weight = child.Visits / visitSum;
+            }
+        }
+
     }
 }

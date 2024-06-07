@@ -25,33 +25,192 @@ namespace UI
     {
         DrawingManager drawingManager;
         Game game;
+        MCTS player1MCTS = null;
+        MCTS player2MCTS = null;
+
+
+        private TaskCompletionSource<Vertex> mouseClickTaskCompletionSource;
 
         public GameBoard(Strategy player1, Strategy player2)
         {
             InitializeComponent();
+
             game = new Game(player1, player2);
+            CreateMCTSTree(player1, player2);
             drawingManager = new DrawingManager(MainCanvas, game);
 
             this.Loaded += GameBoard_Loaded;
             MainCanvas.MouseUp += MainCanvas_MouseUp;
-            MakeMove();
+            //MakeMove();
+            Task.Run(() => RunGame());
+
         }
+
+        private async Task RunGame() 
+        {
+            while (!game.IsGameOver)
+            {
+                // potencjalne uruchomienie MCTS
+                // następny ruch
+                await MakeMoveV2();
+
+                // weryfikacja gry
+                await VerifyGameStatus();
+
+                // poprawianie drzewa mcts
+            }
+        }
+
+        private void CreateMCTSTree(Strategy player1, Strategy player2) 
+        {
+            switch (player1) 
+            {
+                case Strategy.MCTS:
+                case Strategy.MCTS_PUCT:
+                case Strategy.MCTS_RAVE:
+                    player1MCTS = new MCTS(new Node(game, null), false);
+                    break;
+            }
+
+            switch (player2)
+            {
+                case Strategy.MCTS:
+                case Strategy.MCTS_PUCT:
+                case Strategy.MCTS_RAVE:
+                    player2MCTS = new MCTS(new Node(game, null), true);
+                    break;
+            }
+        }
+
+        //private void MainCanvas_MouseUp(object sender, MouseButtonEventArgs e)
+        //{
+        //    if (drawingManager.SelectedPossibleMove != null) 
+        //    { 
+        //        var move = Point.ToVertex(drawingManager.SelectedPossibleMove);
+
+        //        bool canBounceFromNewPos = game.CanBounceFrom(move.x, move.y);
+        //        game.MakeMove(move);
+        //        if (!canBounceFromNewPos)
+        //            game.PlayerMove = !game.PlayerMove;
+
+        //        VerifyGameStatus();
+        //        MakeMove();
+        //    }
+        //}
 
         private void MainCanvas_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            if (drawingManager.SelectedPossibleMove != null) 
-            { 
+            if (drawingManager.SelectedPossibleMove != null && mouseClickTaskCompletionSource !=null)
+            {
                 var move = Point.ToVertex(drawingManager.SelectedPossibleMove);
 
-                bool canBounceFromNewPos = game.CanBounceFrom(move.x, move.y);
-                game.MakeMove(move);
-                if (!canBounceFromNewPos)
-                    game.PlayerMove = !game.PlayerMove;
+                mouseClickTaskCompletionSource.SetResult(game.Board[move.x, move.y]);
 
-                VerifyGameStatus();
-                MakeMove();
+                return; 
+
             }
         }
+
+
+        private async Task<Vertex> WaitForMouseClick() 
+        {
+            mouseClickTaskCompletionSource = new TaskCompletionSource<Vertex>();
+            Vertex selectedVertex = await mouseClickTaskCompletionSource.Task;
+            mouseClickTaskCompletionSource = null;
+
+            return selectedVertex;
+
+        }
+
+        private async Task MakeMoveV2() 
+        {
+            switch (game.CurrentPlayer) 
+            {
+                case CurentPlayer.Player1:
+                    MovePlayer1();
+                    break;
+                case CurentPlayer.Player2:
+                    MovePlayer2();
+                    break;
+                default:
+                    throw new NotImplementedException();
+            }
+        }
+
+
+        private async void MovePlayer1() 
+        {
+            Vertex move = null;
+            switch (game.Player1) 
+            {
+                case Strategy.Player:
+                    move = await WaitForMouseClick();
+                    break;
+                case Strategy.MCTS_PUCT:
+                case Strategy.MCTS_RAVE:
+                case Strategy.MCTS:
+                    break;
+                case Strategy.Heuristics:
+                    move = game.GetMoveHerestic();
+                    break;
+            }
+
+            // should switch players
+            if (!game.CanBounceFrom(move.X, move.Y)) 
+            {
+                if (game.CurrentPlayer == CurentPlayer.Player1)
+                {
+                    game.CurrentPlayer = CurentPlayer.Player2;
+                }
+                else 
+                {
+                    game.CurrentPlayer = CurentPlayer.Player1;
+                }
+
+                game.PlayerMove = !game.PlayerMove;
+            }
+
+
+            // make move
+            game.MakeMoveV2(move);
+
+        }
+
+        private async void MovePlayer2() 
+        {
+
+            Vertex move = null;
+            switch (game.Player2)
+            {
+                case Strategy.Player:
+                    move = await WaitForMouseClick();
+                    break;
+                case Strategy.MCTS_PUCT:
+                case Strategy.MCTS_RAVE:
+                case Strategy.MCTS:
+                    break;
+                case Strategy.Heuristics:
+                    move = game.GetMoveHerestic();
+                    break;
+            }
+
+            // should switch players
+            if (!game.CanBounceFrom(move.X, move.Y))
+            {
+                if (game.CurrentPlayer == CurentPlayer.Player1)
+                {
+                    game.CurrentPlayer = CurentPlayer.Player2;
+                }
+                else
+                {
+                    game.CurrentPlayer = CurentPlayer.Player1;
+                }
+                game.PlayerMove = !game.PlayerMove;
+            }
+
+            game.MakeMoveV2(move);
+        }
+
 
         private async void MakeMove()
         {
@@ -66,7 +225,7 @@ namespace UI
             }
         }
 
-        private void VerifyGameStatus()
+        private async Task VerifyGameStatus()
         {
             if (game.IsGameOver)
                 drawingManager.GameFinished(game.PlayerGoal);

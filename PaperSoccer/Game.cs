@@ -1,4 +1,6 @@
-﻿namespace PaperSoccer
+﻿using System.Transactions;
+
+namespace PaperSoccer
 {
     public class Game
     {
@@ -14,11 +16,14 @@
         public Strategy Player1 { get; set; }
         public Strategy Player2 { get; set; }
 
+        public CurentPlayer CurrentPlayer { get; set; }
+
         public Game(Strategy p1, Strategy p2)
         {
             Player1 = p1;
             Player2 = p2;
             PlayerMove = true;
+            CurrentPlayer = CurentPlayer.Player1;
 
             BallPosition = (MaxX / 2, MaxY / 2);
             Board = new Vertex[MaxX, MaxY];
@@ -73,6 +78,15 @@
                 BallPosition = move;
             }
         }
+
+        public void MakeMoveV2(Vertex move)
+        { 
+            Board[BallPositionVertex.X, BallPositionVertex.Y].Neighbors.Remove(move);
+            Board[move.X, move.Y].Neighbors.Remove(BallPositionVertex);
+
+            BallPosition = (move.X,move.Y);
+        }
+
         public void MakeMove((int X, int Y) move)
         {
             var sp = BallPosition; // startPosition
@@ -287,5 +301,62 @@
 
             return neighbors;
         }
+
+
+
+
+        public Vertex GetMoveHerestic() 
+        {
+            Random random = new Random();
+            Vertex nextMove;
+            
+            if (this.CurrentPlayer == CurentPlayer.Player1)
+            {
+                double max = this.BallPositionVertex.Neighbors.Max(p => p.Y);
+
+                for (int i = 0; i < 3; i++)
+                {
+                    var current = max - i;
+
+                    var possibleMoves = this.BallPositionVertex.Neighbors.Where(p => p.Y == current).ToList();
+                    var movesWithAdditionalMove = possibleMoves.Where(p => CanBounceFrom(p.X, p.Y)).ToList();
+
+                    if (movesWithAdditionalMove != null && movesWithAdditionalMove.Count() > 0)
+                    {
+                        return movesWithAdditionalMove[random.Next(movesWithAdditionalMove.Count())];
+                    }
+                    else if (possibleMoves != null && possibleMoves.Count() > 0)
+                    {
+                        return possibleMoves[random.Next(possibleMoves.Count())];
+                    }
+                }
+                return null;
+
+            }
+            else 
+            {
+                double min = this.BallPositionVertex.Neighbors.Min(p => p.Y);
+
+                for (int i = 0; i < 3; i++)
+                {
+                    var current = min + i;
+
+                    var possibleMoves = this.BallPositionVertex.Neighbors.Where(p => p.Y == current).ToList();
+                    var movesWithAdditionalMove = possibleMoves.Where(p => CanBounceFrom(p.X, p.Y)).ToList();
+
+                    if (movesWithAdditionalMove != null && movesWithAdditionalMove.Count() > 0)
+                    {
+                        return movesWithAdditionalMove[random.Next(movesWithAdditionalMove.Count())];
+                    }
+                    else if (possibleMoves != null && possibleMoves.Count() > 0)
+                    {
+                        return possibleMoves[random.Next(possibleMoves.Count())];
+                    }
+                }
+
+                return null;
+            }
+        }
+
     }
 }

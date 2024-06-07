@@ -24,6 +24,8 @@ public class DrawingManager
     Label Player1;
     Label Player2;
     Label? Winner;
+    Label WinnerPlayer1;
+    Label WinnerPlayer2;
 
     public Point? SelectedPossibleMove;
     public bool IsGameOver { get; set; }
@@ -46,15 +48,17 @@ public class DrawingManager
 
         Player1 = GetLabel(new Point(1, mesh.Y - 2), Consts.Player1, Consts.BorderColor);
         Player2 = GetLabel(new Point(1, 1), Consts.Player2, Consts.BorderColor);
+        WinnerPlayer1 = GetLabel(new Point(mesh.X / 2 - 1, 0), $"Winner: {Consts.Player1}", Consts.BorderColor);
+        WinnerPlayer2 = GetLabel(new Point(mesh.X / 2 - 1, mesh.Y - 1), $"Winner: {Consts.Player2}", Consts.BorderColor);
     }
 
-    public void GameFinished(bool playerWon)
+    public async void GameFinished(bool playerWon)
     {
         IsGameOver = true;
         if (playerWon)
-            Winner = GetLabel(new Point(mesh.X / 2 - 1, 0), $"Winner: {Consts.Player1}", Consts.BorderColor);
+            Winner = WinnerPlayer1;
         else
-            Winner = GetLabel(new Point(mesh.X / 2 - 1, mesh.Y - 1), $"Winner: {Consts.Player2}", Consts.BorderColor);
+            Winner = WinnerPlayer2;
     }
 
     public void Update()
@@ -98,20 +102,23 @@ public class DrawingManager
     private void DrawPossibleMoves(Point mousePosition)
     {
         bool foundNextPoint = false;
-        foreach (var possibleMove in mesh.PossibleMoves)
+        lock (Mesh.locker)
         {
-            var possibleMovePoint = possibleMove.Map(xOffset, yOffset);
-            if (Utility.PointNearbyOtherPoint(possibleMovePoint, Consts.SelectPossibleMoveSize, mousePosition))
+            foreach (var possibleMove in mesh.PossibleMoves)
             {
-                SelectedPossibleMove = possibleMove;
-                foundNextPoint = true;
-                canvas.Children.Add(GetSelectPossibleMove(possibleMove));
+                var possibleMovePoint = possibleMove.Map(xOffset, yOffset);
+                if (Utility.PointNearbyOtherPoint(possibleMovePoint, Consts.SelectPossibleMoveSize, mousePosition))
+                {
+                    SelectedPossibleMove = possibleMove;
+                    foundNextPoint = true;
+                    canvas.Children.Add(GetSelectPossibleMove(possibleMove));
+                }
+
+                if (!foundNextPoint)
+                    SelectedPossibleMove = null;
+
+                canvas.Children.Add(GetPossibleMove(possibleMove));
             }
-
-            if (!foundNextPoint)
-                SelectedPossibleMove = null;
-
-            canvas.Children.Add(GetPossibleMove(possibleMove));
         }
     }
 
@@ -199,5 +206,7 @@ public class DrawingManager
 
         return label;
     }
+
+
 
 }

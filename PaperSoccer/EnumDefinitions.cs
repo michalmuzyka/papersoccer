@@ -16,6 +16,12 @@ public enum GameStatus
     Win
 }
 
+public enum CurentPlayer 
+{
+    Player1,
+    Player2
+}
+
 public enum Strategy
 {
     [Display(Name = "Player")]
