@@ -16,14 +16,47 @@ namespace PaperSoccer
         public Strategy Player1 { get; set; }
         public Strategy Player2 { get; set; }
 
-        public CurentPlayer CurrentPlayer { get; set; }
+        public Players CurrentPlayer { get; set; }
+
+
+        public Players Winner 
+        {
+            get 
+            {
+                if (BallPositionVertex.IsGoal) 
+                {
+                    if (BallPosition.X >= 3 && BallPosition.X <= 5 && BallPosition.Y == 0)
+                    {
+                        return Players.Player1;
+                    }
+                    else 
+                    {
+                        return Players.Player2;
+                    }
+                }
+
+                if (BallPositionVertex.NoMoves) 
+                {
+                    if (CurrentPlayer == Players.Player1)
+                    {
+                        return Players.Player2;
+                    }
+                    else 
+                    {
+                        return Players.Player1;
+                    }
+                }
+
+                throw new InvalidOperationException();
+            }
+        }
 
         public Game(Strategy p1, Strategy p2)
         {
             Player1 = p1;
             Player2 = p2;
             PlayerMove = true;
-            CurrentPlayer = CurentPlayer.Player1;
+            CurrentPlayer = Players.Player1;
 
             BallPosition = (MaxX / 2, MaxY / 2);
             Board = new Vertex[MaxX, MaxY];
@@ -327,7 +360,7 @@ namespace PaperSoccer
             Random random = new Random();
             Vertex nextMove;
             
-            if (this.CurrentPlayer == CurentPlayer.Player1)
+            if (this.CurrentPlayer == Players.Player1)
             {
                 double max = this.BallPositionVertex.Neighbors.Max(p => p.Y);
 

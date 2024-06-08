@@ -22,8 +22,8 @@ namespace PaperSoccer
             for (int i = 0; i < simulationNr; i++) // Liczba symulacji
             {
                 var node = Selection();
-                int result = Simulation(node);
-                Backpropagation(node, result);
+                var winner = Simulation(node);
+                Backpropagation(node, winner);
             }
         }
 
@@ -64,31 +64,48 @@ namespace PaperSoccer
             return node.Children.First();
         }
 
-        public int Simulation(Node node)
+        public Players Simulation(Node node)
         {
             // Losowe symulacje, aż do zakończenia gry
             var gameClone = node.State.Clone();
             var topPlayer = TopPlayer;
 
-            while (!node.IsTerminal)
+            while (!gameClone.IsGameOver)
             {
                 var availableMoves = node.GetAllPossibleMoves();
                 var randomMove = availableMoves[new Random().Next(availableMoves.Count)];
-                gameClone.MakeMove(randomMove.Board, randomMove.BallPosition);
-                topPlayer = !topPlayer;
-                node = new Node(gameClone, node);
-            }
 
-            return node.Value * (topPlayer ? -1 : 1);
+                if (!gameClone.CanBounceFrom(gameClone.BallPosition.X, randomMove.BallPosition.Y))
+                {
+                    if (gameClone.CurrentPlayer == Players.Player1)
+                    {
+                        gameClone.CurrentPlayer = Players.Player2;
+                    }
+                    else
+                    {
+                        gameClone.CurrentPlayer = Players.Player1;
+                    }
+                    gameClone.PlayerMove = !gameClone.PlayerMove;
+                }
+
+                gameClone.MakeMoveV2(randomMove.BallPositionVertex);
+
+                
+            }
+            return gameClone.Winner;
         }
 
-        public void Backpropagation(Node? node, int result)
+        public void Backpropagation(Node? node, Players winner)
         {
             // Aktualizacja wyników węzłów w górę drzewa
             while (node != null)
             {
                 node.Visits++;
-                node.Wins += result;
+                if (node.State.CurrentPlayer == winner) 
+                {
+                    node.Wins++;
+                }
+                
                 node = node.Parent;
             }
         }
@@ -99,6 +116,16 @@ namespace PaperSoccer
             var bestChild = Root.Children.OrderByDescending(c => c.Visits).First();
             //return Root.SelectBestChild().State;
             return bestChild.State;
+        }
+
+
+        public Vertex GetBestChildV2() 
+        {
+
+
+            var bestChild = Root.Children.OrderByDescending(X => X.Wins / X.Visits).First();
+
+            return bestChild.State.BallPositionVertex;
         }
     }
 }

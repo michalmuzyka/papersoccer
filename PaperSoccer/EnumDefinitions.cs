@@ -16,11 +16,13 @@ public enum GameStatus
     Win
 }
 
-public enum CurentPlayer 
+public enum Players 
 {
     Player1,
     Player2
 }
+
+
 
 public enum Strategy
 {

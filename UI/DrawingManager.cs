@@ -55,7 +55,7 @@ public class DrawingManager
     public async void GameFinished(bool playerWon)
     {
         IsGameOver = true;
-        if (playerWon)
+        if (this.game.Winner == Players.Player1)
             Winner = WinnerPlayer1;
         else
             Winner = WinnerPlayer2;

@@ -15,6 +15,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Windows.Threading;
+using System.Xml.Linq;
 
 namespace UI
 {
@@ -27,7 +28,7 @@ namespace UI
         Game game;
         MCTS player1MCTS = null;
         MCTS player2MCTS = null;
-        private const int SIMULATION_MCTS = 100;
+        private const int SIMULATION_MCTS = 5;
 
         int update = 0;
         int waitForClick = 0;
@@ -63,10 +64,10 @@ namespace UI
                 await VerifyGameStatus();
 
                 // poprawianie drzewa mcts
-
+                UpdateMCTSTreesAfterMove();
 
                 // czekanie sekundy jesli gra komputer vs komputer
-                if(game.Player1 != Strategy.Player && game.Player2 != Strategy.Player) {
+                if (game.Player1 != Strategy.Player && game.Player2 != Strategy.Player) {
                     await Task.Delay(1000);
                 }
             }
@@ -95,6 +96,49 @@ namespace UI
             }
         }
 
+
+        private void UpdateMCTSTreesAfterMove()
+        {
+            var searchedBall = this.game.BallPosition;
+
+            if (player1MCTS != null) 
+            {
+                var searchedGame = player1MCTS.Root.Children.Where(x => searchedBall == x.State.BallPosition).FirstOrDefault();
+
+                if (searchedGame == null)
+                {
+                    // stworzenie nowego roota
+                    var gameClone = player1MCTS.Root.State.Clone();
+                    var newNode = new Node(gameClone, null);
+                    player1MCTS.Root = newNode;
+                }
+                else 
+                {
+                    player1MCTS.Root = searchedGame;
+                }
+
+                player1MCTS.Root.Parent = null;
+            }
+
+            if (player2MCTS != null)
+            {
+                var searchedGame = player2MCTS.Root.Children.Where(x => searchedBall == x.State.BallPosition).FirstOrDefault();
+
+                if (searchedGame == null)
+                {
+                    // stworzenie nowego roota
+                    var gameClone = player2MCTS.Root.State.Clone();
+                    var newNode = new Node(gameClone, null);
+                    player2MCTS.Root = newNode;
+                }
+                else
+                {
+                    player2MCTS.Root = searchedGame;
+                }
+
+                player2MCTS.Root.Parent = null;
+            }
+        }
 
         private void MainCanvas_MouseUp(object sender, MouseButtonEventArgs e)
         {
@@ -128,10 +172,10 @@ namespace UI
         {
             switch (game.CurrentPlayer) 
             {
-                case CurentPlayer.Player1:
+                case Players.Player1:
                     MovePlayer1();
                     break;
-                case CurentPlayer.Player2:
+                case Players.Player2:
                     MovePlayer2();
                     break;
                 default:
@@ -152,9 +196,9 @@ namespace UI
                 case Strategy.MCTS_RAVE:
                 case Strategy.MCTS:
                     player1MCTS.RunSimulation(SIMULATION_MCTS);
+                    move = player1MCTS.GetBestChildV2();
                     break;
                 case Strategy.Heuristics:
-                    //await Task.Delay(1000);
                     move = game.GetMoveHerestic();
                     break;
             }
@@ -164,13 +208,13 @@ namespace UI
                 // should switch players
                 if (!game.CanBounceFrom(move.X, move.Y))
                 {
-                    if (game.CurrentPlayer == CurentPlayer.Player1)
+                    if (game.CurrentPlayer == Players.Player1)
                     {
-                        game.CurrentPlayer = CurentPlayer.Player2;
+                        game.CurrentPlayer = Players.Player2;
                     }
                     else
                     {
-                        game.CurrentPlayer = CurentPlayer.Player1;
+                        game.CurrentPlayer = Players.Player1;
                     }
 
                     game.PlayerMove = !game.PlayerMove;
@@ -196,9 +240,9 @@ namespace UI
                 case Strategy.MCTS_RAVE:
                 case Strategy.MCTS:
                     player2MCTS.RunSimulation(SIMULATION_MCTS);
+                    move = player2MCTS.GetBestChildV2();
                     break;
                 case Strategy.Heuristics:
-                    //await Task.Delay(1000);
                     move = game.GetMoveHerestic();
                     break;
             }
@@ -208,13 +252,13 @@ namespace UI
                 // should switch players
                 if (!game.CanBounceFrom(move.X, move.Y))
                 {
-                    if (game.CurrentPlayer == CurentPlayer.Player1)
+                    if (game.CurrentPlayer == Players.Player1)
                     {
-                        game.CurrentPlayer = CurentPlayer.Player2;
+                        game.CurrentPlayer = Players.Player2;
                     }
                     else
                     {
-                        game.CurrentPlayer = CurentPlayer.Player1;
+                        game.CurrentPlayer = Players.Player1;
                     }
                     game.PlayerMove = !game.PlayerMove;
                 }
