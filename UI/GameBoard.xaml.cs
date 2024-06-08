@@ -28,7 +28,7 @@ namespace UI
         Game game;
         MCTS player1MCTS = null;
         MCTS player2MCTS = null;
-        private const int SIMULATION_MCTS = 5;
+        private const int SIMULATION_MCTS = 100;
 
         int update = 0;
         int waitForClick = 0;

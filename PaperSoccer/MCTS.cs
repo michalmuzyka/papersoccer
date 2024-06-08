@@ -72,10 +72,10 @@ namespace PaperSoccer
 
             while (!gameClone.IsGameOver)
             {
-                var availableMoves = node.GetAllPossibleMoves();
+                var availableMoves = GetPossibleMovexMCTS(gameClone);
                 var randomMove = availableMoves[new Random().Next(availableMoves.Count)];
 
-                if (!gameClone.CanBounceFrom(gameClone.BallPosition.X, randomMove.BallPosition.Y))
+                if (!gameClone.CanBounceFrom(randomMove.X, randomMove.Y))
                 {
                     if (gameClone.CurrentPlayer == Players.Player1)
                     {
@@ -88,11 +88,31 @@ namespace PaperSoccer
                     gameClone.PlayerMove = !gameClone.PlayerMove;
                 }
 
-                gameClone.MakeMoveV2(randomMove.BallPositionVertex);
+                gameClone.MakeMoveV2(randomMove);
 
                 
             }
             return gameClone.Winner;
+        }
+
+
+        private List<Vertex> GetPossibleMovexMCTS(Game game) 
+        {
+            var retList = new List<Vertex>();
+            var ball = game.BallPositionVertex;
+
+
+            if (ball.Neighbors.Count == 0) 
+            {
+                return retList;
+            }
+
+            foreach ( var neighbor in ball.Neighbors ) 
+            {
+                retList.Add( neighbor );
+            }
+            return retList;
+
         }
 
         public void Backpropagation(Node? node, Players winner)
@@ -121,9 +141,18 @@ namespace PaperSoccer
 
         public Vertex GetBestChildV2() 
         {
+            var bestChild = Root.Children[0];
+            double bestWinRate = 1- (double) bestChild.Wins / bestChild.Visits;
 
-
-            var bestChild = Root.Children.OrderByDescending(X => X.Wins / X.Visits).First();
+            foreach (var child in Root.Children)
+            {
+                double winRate = 1 - (double)child.Wins / child.Visits;
+                if (winRate > bestWinRate)
+                {
+                    bestWinRate = winRate;
+                    bestChild = child;
+                }
+            }
 
             return bestChild.State.BallPositionVertex;
         }
