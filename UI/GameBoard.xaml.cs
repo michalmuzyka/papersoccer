@@ -63,8 +63,7 @@ namespace UI
                 // weryfikacja gry
                 await VerifyGameStatus();
 
-                // poprawianie drzewa mcts
-                UpdateMCTSTreesAfterMove();
+
 
                 // czekanie sekundy jesli gra komputer vs komputer
                 if (game.Player1 != Strategy.Player && game.Player2 != Strategy.Player) {
@@ -223,6 +222,9 @@ namespace UI
 
                 // make move
                 game.MakeMoveV2(move);
+
+                // poprawianie drzewa mcts
+                UpdateMCTSTreesAfterMove();
             }
 
         }
@@ -264,6 +266,9 @@ namespace UI
                 }
 
                 game.MakeMoveV2(move);
+
+                // poprawianie drzewa mcts
+                UpdateMCTSTreesAfterMove();
             }
         }
 
