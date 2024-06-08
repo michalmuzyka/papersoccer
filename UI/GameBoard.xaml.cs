@@ -28,7 +28,7 @@ namespace UI
         Game game;
         MCTS player1MCTS = null;
         MCTS player2MCTS = null;
-        private const int SIMULATION_MCTS = 100;
+        private const int SIMULATION_MCTS = 1000;
 
         int update = 0;
         int waitForClick = 0;
@@ -273,25 +273,13 @@ namespace UI
         }
 
 
-        private async void MakeMove()
-        {
-            if ((game.PlayerMove && game.Player1 != Strategy.Player) || 
-                (!game.PlayerMove && game.Player2 != Strategy.Player))
-            {
-                await Task.Delay(1000);
-                game.AImove();
-                game.PlayerMove = !game.PlayerMove;
-                VerifyGameStatus();
-                MakeMove();
-            }
-        }
 
         private async Task VerifyGameStatus()
         {
             if (game.IsGameOver)
-                drawingManager.GameFinished(game.PlayerGoal);
+                drawingManager.GameFinished();
             else if (game.GetPossibleMoves().Count == 0)
-                drawingManager.GameFinished(game.PlayerMove);
+                drawingManager.GameFinished();
             else
                 Interlocked.Exchange(ref update, 1);
         }

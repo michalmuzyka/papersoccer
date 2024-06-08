@@ -144,32 +144,6 @@ namespace PaperSoccer
             BallPosition = newBallPos;
         }
 
-        public void AImove()
-        {
-            Strategy s = Player2;
-            if (PlayerMove) //player 1
-                s = Player1;
-
-            
-            switch (s)
-            {
-                case Strategy.Heuristics:
-                    MakeMove(GetRandomMoves());
-                    break;
-                case Strategy.MCTS:
-                    var mcts = new MCTS(new Node(this, null), true);
-                    //mcts.RunSimulation();
-                    var bestMove = mcts.GetBestMove();
-                    MakeMove(bestMove.Board, bestMove.BallPosition);
-                    break;
-                case Strategy.MCTS_RAVE:
-                    break;
-                case Strategy.MCTS_PUCT: 
-                    break;
-                default:
-                    break;
-            }
-        }
 
         
         /// <summary>

@@ -52,7 +52,7 @@ public class DrawingManager
         WinnerPlayer2 = GetLabel(new Point(mesh.X / 2 - 1, mesh.Y - 1), $"Winner: {Consts.Player2}", Consts.BorderColor);
     }
 
-    public async void GameFinished(bool playerWon)
+    public async void GameFinished()
     {
         IsGameOver = true;
         if (this.game.Winner == Players.Player1)

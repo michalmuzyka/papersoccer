@@ -53,11 +53,25 @@ namespace PaperSoccer
         public Node Expansion(Node node)
         {
             // Rozszerzenie węzła przez dodanie wszystkich możliwych ruchów jako nowe dzieci
-            var availableMoves = node.GetAllPossibleMoves();
+            var availableMoves = GetPossibleMovexMCTS(node.State);
+
             foreach (var move in availableMoves)
             {
                 var gameClone = node.State.Clone();
-                gameClone.MakeMove(move.Board, move.BallPosition);
+                if (!gameClone.CanBounceFrom(move.X, move.Y))
+                {
+                    if (gameClone.CurrentPlayer == Players.Player1)
+                    {
+                        gameClone.CurrentPlayer = Players.Player2;
+                    }
+                    else
+                    {
+                        gameClone.CurrentPlayer = Players.Player1;
+                    }
+                    gameClone.PlayerMove = !gameClone.PlayerMove;
+                }
+
+                gameClone.MakeMoveV2(move);
                 var newNode = new Node(gameClone, node);
                 node.Children.Add(newNode);
             }
@@ -141,6 +155,8 @@ namespace PaperSoccer
 
         public Vertex GetBestChildV2() 
         {
+            if(Root.Children.Count == 0) return null;
+
             var bestChild = Root.Children[0];
             double bestWinRate = 1- (double) bestChild.Wins / bestChild.Visits;
             double winRate = 0;
