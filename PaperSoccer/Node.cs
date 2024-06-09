@@ -18,6 +18,9 @@ namespace PaperSoccer
 
         public double puct_weight { get; set; }
 
+        public double[,] RAVEVisitCount { get; set; } = new double[9, 13];
+        public double[,] RAVETotalReward { get; set; } = new double[9, 13];
+
         public Node(Game game, Node? parent = null)
         {
             State = game;
@@ -45,7 +48,7 @@ namespace PaperSoccer
 
  
 
-        public Node SelectBestChild()
+        public virtual Node SelectBestChild()
         {
             double bestUCT = UCT.CalculateUCT(this.Children[0], this.Visits);
             int bestUCTindex = 0;
@@ -63,7 +66,6 @@ namespace PaperSoccer
 
             return this.Children[bestUCTindex];
         }
-
 
         public void CalculateChildrenNodesWeights() 
         {

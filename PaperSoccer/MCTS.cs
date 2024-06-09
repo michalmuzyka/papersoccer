@@ -20,7 +20,7 @@ namespace PaperSoccer
             TreeForPlayer = player;
         }
 
-        public void RunSimulation(int simulationNr)
+        public virtual void RunSimulation(int simulationNr)
         {
             for (int i = 0; i < simulationNr; i++) // Liczba symulacji
             {
@@ -30,7 +30,7 @@ namespace PaperSoccer
             }
         }
 
-        public Node Selection()
+        public virtual Node Selection()
         {
             // Wybierz węzeł do rozszerzenia (wybierz najlepsze dziecko, dopóki węzeł nie jest liściem)
             var node = Root;
@@ -81,7 +81,7 @@ namespace PaperSoccer
             return node.Children.First();
         }
 
-        public Players Simulation(Node node)
+        public virtual Players Simulation(Node node)
         {
             // Losowe symulacje, aż do zakończenia gry
             var gameClone = node.State.Clone();
@@ -113,7 +113,7 @@ namespace PaperSoccer
         }
 
 
-        private List<Vertex> GetPossibleMovexMCTS(Game game) 
+        protected List<Vertex> GetPossibleMovexMCTS(Game game) 
         {
             var retList = new List<Vertex>();
             var ball = game.BallPositionVertex;
@@ -132,7 +132,7 @@ namespace PaperSoccer
 
         }
 
-        public void Backpropagation(Node? node, Players winner)
+        public virtual void Backpropagation(Node? node, Players winner)
         {
             // Aktualizacja wyników węzłów w górę drzewa
             while (node != null)
@@ -151,15 +151,6 @@ namespace PaperSoccer
                 node = node.Parent;
             }
         }
-
-        public Game GetBestMove()
-        {
-            // Zwraca najlepszy ruch na podstawie statystyk MCTS
-            var bestChild = Root.Children.OrderByDescending(c => c.Visits).First();
-            //return Root.SelectBestChild().State;
-            return bestChild.State;
-        }
-
 
         public Vertex GetBestChildV2() 
         {

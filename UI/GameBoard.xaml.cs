@@ -80,8 +80,10 @@ namespace UI
             {
                 case Strategy.MCTS:
                 case Strategy.MCTS_PUCT:
-                case Strategy.MCTS_RAVE:
                     player1MCTS = new MCTS(new Node(game, null), false, Players.Player1);
+                    break;
+                case Strategy.MCTS_RAVE:
+                    player1MCTS = new MCTSRAVE(new Node(game, null), false, Players.Player1);
                     break;
             }
 
@@ -89,8 +91,10 @@ namespace UI
             {
                 case Strategy.MCTS:
                 case Strategy.MCTS_PUCT:
+                    player2MCTS = new MCTS(new Node(game, null), true, Players.Player2);
+                    break;
                 case Strategy.MCTS_RAVE:
-                    player2MCTS = new MCTS(new Node(game, null), true,Players.Player2);
+                    player2MCTS = new MCTSRAVE(new Node(game, null), true,Players.Player2);
                     break;
             }
         }
@@ -107,7 +111,7 @@ namespace UI
                 if (searchedGame == null)
                 {
                     // stworzenie nowego roota
-                    var gameClone = player1MCTS.Root.State.Clone();
+                    var gameClone = game.Clone();
                     var newNode = new Node(gameClone, null);
                     player1MCTS.Root = newNode;
                 }
@@ -126,7 +130,7 @@ namespace UI
                 if (searchedGame == null)
                 {
                     // stworzenie nowego roota
-                    var gameClone = player2MCTS.Root.State.Clone();
+                    var gameClone = game.Clone();
                     var newNode = new Node(gameClone, null);
                     player2MCTS.Root = newNode;
                 }

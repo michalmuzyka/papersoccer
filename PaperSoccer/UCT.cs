@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace PaperSoccer
 {
@@ -11,6 +12,8 @@ namespace PaperSoccer
     public static class UCT 
     {
         private static readonly double C = Math.Sqrt(2);
+
+        private static readonly double b = 10;
 
         public static double CalculateUCT(Node node, int parentVisitCount) 
         {
@@ -28,9 +31,14 @@ namespace PaperSoccer
 
 
 
-        public static double CalculateRave_UCT(Node node, int parentVisitCount) 
+        public static double CalculateRave_UCT(Node child, int parentVisitCount, Node root) 
         {
-            return 0;
+            if (child.Visits < 1) return double.MaxValue;
+
+            var beta = b/ (b + root.RAVEVisitCount[child.State.BallPositionVertex.X,child.State.BallPositionVertex.Y]);
+
+
+            return  (1 - beta) * C * Math.Sqrt(Math.Log(parentVisitCount) / child.Visits) + beta * root.RAVETotalReward[child.State.BallPositionVertex.X, child.State.BallPositionVertex.Y] ;
         }
     }
 }
