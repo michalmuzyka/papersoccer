@@ -114,7 +114,7 @@ namespace PaperSoccer
 
         public void MakeMoveV2(Vertex move)
         { 
-            Board[BallPositionVertex.X, BallPositionVertex.Y].Neighbors.Remove(move);
+            Board[BallPositionVertex.X, BallPositionVertex.Y].Neighbors.Remove(Board[move.X,move.Y]);
             Board[move.X, move.Y].Neighbors.Remove(BallPositionVertex);
 
             BallPosition = (move.X,move.Y);
@@ -207,6 +207,9 @@ namespace PaperSoccer
             if (PositionIsOnEdge(x, y))
                 return true;
 
+            if (IsInCorner(x, y))
+                return true;
+
             var v1 = Board[x, y];
 
             var allPossibleNeighbors = GetNeighbors(x, y);
@@ -226,6 +229,14 @@ namespace PaperSoccer
                    NotLegitPlace(x + 1, y + 1) ||
                    NotLegitPlace(x - 1, y + 1) ||
                    NotLegitPlace(x + 1, y - 1);
+        }
+
+        private bool IsInCorner(int x, int y) 
+        {
+            return (x == 0 && y == 1) ||
+                (x == 8 && y == 1) ||
+                (x == 0 && y == 11) ||
+                (x == 8 && y == 11);
         }
 
         public Game Clone()

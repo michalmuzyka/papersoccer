@@ -11,10 +11,13 @@ namespace PaperSoccer
         public Node Root { get; set; }
         public bool TopPlayer { get; set; } // czy ten grający na górze
 
-        public MCTS(Node root, bool topPlayer)
+        public Players TreeForPlayer { get; set; }
+
+        public MCTS(Node root, bool topPlayer, Players player)
         {
             Root = root;
             TopPlayer = topPlayer;
+            TreeForPlayer = player;
         }
 
         public void RunSimulation(int simulationNr)
@@ -135,7 +138,12 @@ namespace PaperSoccer
             while (node != null)
             {
                 node.Visits++;
-                if (node.State.CurrentPlayer == winner) 
+                //if (node.State.CurrentPlayer == winner) 
+                //{
+                //    node.Wins++;
+                //}
+
+                if (this.TreeForPlayer == winner) 
                 {
                     node.Wins++;
                 }
@@ -162,15 +170,15 @@ namespace PaperSoccer
             double winRate = 0;
             foreach (var child in Root.Children)
             {
-                if (Root.State.CurrentPlayer == child.State.CurrentPlayer)
-                {
-                    winRate = (double)child.Wins / child.Visits;
-                }
-                else 
-                {
-                    winRate = 1 -  (double)child.Wins / child.Visits;
-                }
-
+                //if (Root.State.CurrentPlayer == child.State.CurrentPlayer)
+                //{
+                //    winRate = (double)child.Wins / child.Visits;
+                //}
+                //else 
+                //{
+                //    winRate = 1 -  (double)child.Wins / child.Visits;
+                //}
+                winRate = (double)child.Wins / child.Visits;
 
                 if (winRate > bestWinRate)
                 {

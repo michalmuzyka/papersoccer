@@ -81,7 +81,7 @@ namespace UI
                 case Strategy.MCTS:
                 case Strategy.MCTS_PUCT:
                 case Strategy.MCTS_RAVE:
-                    player1MCTS = new MCTS(new Node(game, null), false);
+                    player1MCTS = new MCTS(new Node(game, null), false, Players.Player1);
                     break;
             }
 
@@ -90,7 +90,7 @@ namespace UI
                 case Strategy.MCTS:
                 case Strategy.MCTS_PUCT:
                 case Strategy.MCTS_RAVE:
-                    player2MCTS = new MCTS(new Node(game, null), true);
+                    player2MCTS = new MCTS(new Node(game, null), true,Players.Player2);
                     break;
             }
         }
