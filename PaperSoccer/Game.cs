@@ -39,11 +39,11 @@ namespace PaperSoccer
                 {
                     if (CurrentPlayer == Players.Player1)
                     {
-                        return Players.Player1;
+                        return Players.Player2;
                     }
                     else 
                     {
-                        return Players.Player2;
+                        return Players.Player1;
                     }
                 }
 
@@ -86,10 +86,11 @@ namespace PaperSoccer
             }
         }
 
-        public Game(Vertex[,] board, (int, int) ballPos)
+        public Game(Vertex[,] board, (int, int) ballPos, Players player)
         {
             Board = board;
             BallPosition = ballPos;
+            CurrentPlayer = player;
         }
 
         /// <summary>
@@ -231,7 +232,7 @@ namespace PaperSoccer
                    NotLegitPlace(x + 1, y - 1);
         }
 
-        private bool IsInCorner(int x, int y) 
+        public bool IsInCorner(int x, int y) 
         {
             return (x == 0 && y == 1) ||
                 (x == 8 && y == 1) ||
@@ -268,7 +269,8 @@ namespace PaperSoccer
                 }
             }
 
-            return new Game(newBoard, BallPosition);
+
+            return new Game(newBoard, BallPosition, CurrentPlayer);
         }
 
         // jest kilka miejsc w których nie powinno być Vertexa (rogi planszy) no i poza planszą ofc
