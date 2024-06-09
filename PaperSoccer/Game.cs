@@ -39,11 +39,11 @@ namespace PaperSoccer
                 {
                     if (CurrentPlayer == Players.Player1)
                     {
-                        return Players.Player2;
+                        return Players.Player1;
                     }
                     else 
                     {
-                        return Players.Player1;
+                        return Players.Player2;
                     }
                 }
 
