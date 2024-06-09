@@ -158,17 +158,17 @@ namespace PaperSoccer
             if(Root.Children.Count == 0) return null;
 
             var bestChild = Root.Children[0];
-            double bestWinRate = 1- (double) bestChild.Wins / bestChild.Visits;
+            double bestWinRate = 0;
             double winRate = 0;
             foreach (var child in Root.Children)
             {
-                if (Root.State.CurrentPlayer != child.State.CurrentPlayer)
+                if (Root.State.CurrentPlayer == child.State.CurrentPlayer)
                 {
-                    winRate = 1 - (double)child.Wins / child.Visits;
+                    winRate = (double)child.Wins / child.Visits;
                 }
                 else 
                 {
-                    winRate = (double)child.Wins / child.Visits;
+                    winRate = 1 -  (double)child.Wins / child.Visits;
                 }
 
 
