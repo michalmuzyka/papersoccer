@@ -16,7 +16,7 @@ namespace PaperSoccer
         {
             if (node.Visits < 1) return double.MaxValue;
 
-            return node.Wins / node.Visits + C * Math.Sqrt(Math.Log(parentVisitCount) / node.Visits);
+            return (double) node.Wins / node.Visits + C * Math.Sqrt(Math.Log(parentVisitCount) / node.Visits);
         }
 
 
