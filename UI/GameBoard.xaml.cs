@@ -1,6 +1,9 @@
 ﻿using PaperSoccer;
 using System;
 using System.Collections.Generic;
+using System.Data.SqlTypes;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -28,7 +31,7 @@ namespace UI
         Game game;
         MCTS player1MCTS = null;
         MCTS player2MCTS = null;
-        private const int SIMULATION_MCTS = 1000;
+        private const int SIMULATION_MCTS = 10000;
 
         int update = 0;
         int waitForClick = 0;
@@ -36,6 +39,8 @@ namespace UI
         int mouseY = 0;
 
         private TaskCompletionSource<Vertex> mouseClickTaskCompletionSource;
+        private Stopwatch stopwatch = new Stopwatch();
+        private List<long> mctsSimulationTime = new List<long>();
 
         public GameBoard(Strategy player1, Strategy player2)
         {
@@ -66,12 +71,20 @@ namespace UI
 
 
                 // czekanie sekundy jesli gra komputer vs komputer
-                if (game.Player1 != Strategy.Player && game.Player2 != Strategy.Player) {
-                    await Task.Delay(1000);
-                }
+                //if (game.Player1 != Strategy.Player && game.Player2 != Strategy.Player) {
+                //    await Task.Delay(1000);
+                //}
             }
 
             await VerifyGameStatus();
+
+            if(mctsSimulationTime.Count > 0)
+            {
+                StreamWriter sw = new StreamWriter($"{game.Player2}-{SIMULATION_MCTS}.txt");
+                sw.WriteLine($"{(double) mctsSimulationTime.Average() / 1000}");
+                sw.Close();
+            }
+
         }
 
         private void CreateMCTSTree(Strategy player1, Strategy player2) 
@@ -115,7 +128,7 @@ namespace UI
                     var newNode = new Node(gameClone, null);
                     player1MCTS.Root = newNode;
                 }
-                else 
+                else
                 {
                     player1MCTS.Root = searchedGame;
                 }
@@ -133,14 +146,14 @@ namespace UI
                     var gameClone = game.Clone();
                     var newNode = new Node(gameClone, null);
                     player2MCTS.Root = newNode;
-                }
-                else
-                {
-                    player2MCTS.Root = searchedGame;
-                }
-
-                player2MCTS.Root.Parent = null;
             }
+            else
+            {
+                player2MCTS.Root = searchedGame;
+            }
+
+            player2MCTS.Root.Parent = null;
+        }
         }
 
         private void MainCanvas_MouseUp(object sender, MouseButtonEventArgs e)
@@ -245,8 +258,14 @@ namespace UI
                 case Strategy.MCTS_PUCT:
                 case Strategy.MCTS_RAVE:
                 case Strategy.MCTS:
+                    stopwatch.Restart();
+
                     player2MCTS.RunSimulation(SIMULATION_MCTS);
                     move = player2MCTS.GetBestChildV2();
+                    
+                    stopwatch.Stop();
+                    mctsSimulationTime.Add(stopwatch.ElapsedMilliseconds);
+
                     break;
                 case Strategy.Heuristics:
                     move = game.GetMoveHerestic();
