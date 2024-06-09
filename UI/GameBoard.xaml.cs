@@ -28,7 +28,7 @@ namespace UI
         Game game;
         MCTS player1MCTS = null;
         MCTS player2MCTS = null;
-        private const int SIMULATION_MCTS = 1000;
+        private const int SIMULATION_MCTS = 5000;
 
         int update = 0;
         int waitForClick = 0;
@@ -66,9 +66,9 @@ namespace UI
 
 
                 // czekanie sekundy jesli gra komputer vs komputer
-                if (game.Player1 != Strategy.Player && game.Player2 != Strategy.Player) {
-                    await Task.Delay(1000);
-                }
+                //if (game.Player1 != Strategy.Player && game.Player2 != Strategy.Player) {
+                //    await Task.Delay(1000);
+                //}
             }
 
             await VerifyGameStatus();
@@ -107,11 +107,11 @@ namespace UI
                 if (searchedGame == null)
                 {
                     // stworzenie nowego roota
-                    var gameClone = player1MCTS.Root.State.Clone();
+                    var gameClone = game.Clone();
                     var newNode = new Node(gameClone, null);
                     player1MCTS.Root = newNode;
                 }
-                else 
+                else
                 {
                     player1MCTS.Root = searchedGame;
                 }
@@ -126,7 +126,7 @@ namespace UI
                 if (searchedGame == null)
                 {
                     // stworzenie nowego roota
-                    var gameClone = player2MCTS.Root.State.Clone();
+                    var gameClone = game.Clone();
                     var newNode = new Node(gameClone, null);
                     player2MCTS.Root = newNode;
                 }
